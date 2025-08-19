@@ -140,30 +140,32 @@
         </div>
     </div>
 
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
-
     <!-- Telegram Web App Script -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-    <script>
+    <script type="module">
+        // --- Firebase SDKs ---
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, collection, addDoc, Timestamp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-analytics.js";
+
+        // --- Firebase Configuration ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyDi3Xb3xPk_7bxG0brh85a_KiR80DApWPo",
+            authDomain: "xspin-income-bot.firebaseapp.com",
+            projectId: "xspin-income-bot",
+            storageBucket: "xspin-income-bot.firebasestorage.app",
+            messagingSenderId: "784212385666",
+            appId: "1:784212385666:web:827eca0781e2441b14399b",
+            measurementId: "G-R328XD7019"
+        };
+
+        // --- Initialize Firebase ---
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const analytics = getAnalytics(app);
+
         document.addEventListener('DOMContentLoaded', () => {
-            // --- Firebase Configuration ---
-            // IMPORTANT: Replace with your Firebase project's configuration
-            const firebaseConfig = {
-                apiKey: "YOUR_API_KEY",
-                authDomain: "YOUR_AUTH_DOMAIN",
-                projectId: "YOUR_PROJECT_ID",
-                storageBucket: "YOUR_STORAGE_BUCKET",
-                messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-                appId: "YOUR_APP_ID"
-            };
-
-            // --- Initialize Firebase and Firestore ---
-            const app = firebase.initializeApp(firebaseConfig);
-            const db = firebase.firestore(app);
-
             // --- Telegram Web App Initialization ---
             const tg = window.Telegram.WebApp;
             tg.ready();
@@ -181,7 +183,7 @@
             }
 
             const userId = String(currentUser.id);
-            const userRef = db.collection('users').doc(userId);
+            const userRef = doc(db, 'users', userId);
 
             // --- App State ---
             let userState = {
@@ -215,8 +217,8 @@
             async function initApp() {
                 tg.expand(); // Expand the app to full height
                 await handleReferral();
-                const doc = await userRef.get();
-                if (!doc.exists) {
+                const docSnap = await getDoc(userRef);
+                if (!docSnap.exists()) {
                     // Create new user
                     const newUser = {
                         points: 0,
@@ -224,12 +226,12 @@
                         lastSpinTime: null,
                         firstName: currentUser.first_name,
                         username: currentUser.username || '',
-                        createdAt: new Date()
+                        createdAt: Timestamp.fromDate(new Date())
                     };
-                    await userRef.set(newUser);
+                    await setDoc(userRef, newUser);
                     userState = newUser;
                 } else {
-                    userState = doc.data();
+                    userState = docSnap.data();
                 }
                 updateUI();
             }
@@ -242,7 +244,7 @@
             // --- Monetag Ad ---
             function triggerMonetagAd() {
                 console.log("Attempting to show rewarded ad...");
-                show_9671872('pop').then(() => {
+                window.show_9671872('pop').then(() => {
                     // Ad was watched successfully
                     console.log("Ad watched successfully. Awarding points.");
                     updateUserPoints(userState.points + 5);
@@ -258,7 +260,7 @@
             function updateUserPoints(newPoints, newReferrals = userState.referrals) {
                 userState.points = newPoints;
                 userState.referrals = newReferrals;
-                userRef.update({ points: newPoints, referrals: newReferrals })
+                updateDoc(userRef, { points: newPoints, referrals: newReferrals })
                     .then(updateUI)
                     .catch(e => console.error("Error updating points: ", e));
             }
@@ -268,15 +270,15 @@
                 const referrerId = urlParams.get('ref');
                 if (!referrerId || referrerId === userId) return;
 
-                const doc = await userRef.get();
+                const docSnap = await getDoc(userRef);
                 // Only give referral points if the user is new
-                if (!doc.exists) {
-                    const referrerRef = db.collection('users').doc(referrerId);
-                    const referrerDoc = await referrerRef.get();
-                    if (referrerDoc.exists) {
-                        await referrerRef.update({
-                            points: firebase.firestore.FieldValue.increment(10),
-                            referrals: firebase.firestore.FieldValue.increment(1)
+                if (!docSnap.exists()) {
+                    const referrerRef = doc(db, 'users', referrerId);
+                    const referrerDoc = await getDoc(referrerRef);
+                    if (referrerDoc.exists()) {
+                        await updateDoc(referrerRef, {
+                            points: increment(10),
+                            referrals: increment(1)
                         });
                         console.log(`Credited 10 points to referrer ${referrerId}`);
                     }
@@ -352,9 +354,15 @@
 
                 setTimeout(() => {
                     spinResult.innerText = `You won ${winningPoints} points!`;
-                    updateUserPoints(userState.points + winningPoints);
-                    userState.lastSpinTime = new Date();
-                    userRef.update({ lastSpinTime: userState.lastSpinTime });
+                    const newLastSpinTime = Timestamp.fromDate(new Date());
+                    userState.lastSpinTime = newLastSpinTime;
+                    updateDoc(userRef, {
+                        points: increment(winningPoints),
+                        lastSpinTime: newLastSpinTime
+                    });
+                    // Manually update local state for points since increment doesn't return new value
+                    userState.points += winningPoints;
+                    updateUI();
                 }, 4500); // Wait for animation to finish
             }
 
@@ -373,11 +381,11 @@
                         updateUserPoints(newPoints);
 
                         // Log withdrawal request
-                        db.collection('withdrawals').add({
+                        addDoc(collection(db, 'withdrawals'), {
                             userId: userId,
                             username: currentUser.username || '',
                             pointsWithdrawn: 50,
-                            timestamp: new Date()
+                            timestamp: Timestamp.fromDate(new Date())
                         });
 
                         tg.showAlert('Withdrawal request successful! 50 points have been deducted.');
