@@ -45,6 +45,7 @@
             border-top: 30px solid #ef4444; /* red-500 */
         }
     </style>
+    <script src='//libtl.com/sdk.js' data-zone='9671872' data-sdk='show_9671872'></script>
 </head>
 <body class="bg-gray-900 text-white font-sans antialiased">
 
@@ -238,14 +239,19 @@
                 pointsDisplay.innerText = userState.points || 0;
             }
 
-            // --- Monetag Ad Placeholder ---
+            // --- Monetag Ad ---
             function triggerMonetagAd() {
-                console.log("Monetag ad placeholder triggered.");
-                // PASTE YOUR MONETAG AD CODE HERE
-                // For example: atOptions = { 'key' : '...', 'format' : '...', ... };
-                // After the ad is watched, you would call a function to add points.
-                // For this demo, we'll add points directly.
-                updateUserPoints(userState.points + 5);
+                console.log("Attempting to show rewarded ad...");
+                show_9671872('pop').then(() => {
+                    // Ad was watched successfully
+                    console.log("Ad watched successfully. Awarding points.");
+                    updateUserPoints(userState.points + 5);
+                    tg.showAlert('You have been awarded 5 points!');
+                }).catch(e => {
+                    // An error occurred
+                    console.error("Error showing ad: ", e);
+                    tg.showAlert('Sorry, an error occurred while showing the ad. Please try again.');
+                });
             }
 
             // --- Feature Logic ---
