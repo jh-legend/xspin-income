@@ -146,7 +146,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function referFriend() {
-        const botUsername = "YOUR_BOT_USERNAME"; // IMPORTANT: Please replace this with your bot's username
+        const botUsername = "xspin_income_bot"; // IMPORTANT: Please replace this with your bot's username
         if (botUsername === "YOUR_BOT_USERNAME") {
             tg.showAlert("Please ask the developer to set the bot username in app.js.");
             return;
