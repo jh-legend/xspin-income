@@ -104,17 +104,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Monetag Ad ---
     function triggerMonetagAd() {
-        console.log("Attempting to show rewarded ad...");
-        window.show_9671872('pop').then(() => {
-            // Ad was watched successfully
-            console.log("Ad watched successfully. Awarding points.");
-            updateUserPoints(userState.points + 5);
-            tg.showAlert('You have been awarded 5 points!');
-        }).catch(e => {
-            // An error occurred
-            console.error("Error showing ad: ", e);
-            tg.showAlert('Sorry, an error occurred while showing the ad. Please try again.');
-        });
+        // This function is now responsible for initiating the ad, but NOT for awarding points.
+        // The point reward is handled by the secure backend (Firebase Cloud Function) via postback.
+
+        // Generate a unique ID for this specific ad event.
+        // This is crucial for the backend to prevent duplicate reward requests (idempotency).
+        const ymid = crypto.randomUUID();
+
+        // Check if the Monetag SDK function is available on the window object.
+        if (window.show_9671872) {
+            console.log(`Triggering ad with ymid: ${ymid} and telegram_id: ${userId}`);
+
+            // We need to pass our custom data to the ad call.
+            // Monetag's postback system will then use macros to pick up these values and send them to our backend.
+            const options = {
+                ymid: ymid,
+                telegram_id: userId
+            };
+
+            // Call the ad function with the popup format and our custom options.
+            window.show_9671872('pop', options).then(() => {
+                // IMPORTANT: We NO LONGER award points on the client-side.
+                // The .then() block is now only for UI feedback.
+                console.log("Ad popup closed. Reward will be processed by the server if successful.");
+                tg.showAlert('Thanks for watching! Your reward is being processed and will appear in your balance soon.');
+            }).catch(e => {
+                // Handle cases where the ad fails to show.
+                console.error("Error showing ad: ", e);
+                tg.showAlert('Sorry, an error occurred while showing the ad. Please try again.');
+            });
+        } else {
+            console.error("Monetag ad function 'show_9671872' not found on window object.");
+            tg.showAlert("Error: Ad service is not available at the moment.");
+        }
     }
 
     // --- Feature Logic ---
