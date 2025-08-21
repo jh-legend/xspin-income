@@ -192,11 +192,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const referFriend = () => {
-        const botUsername = "YOUR_BOT_USERNAME"; // IMPORTANT: Replace with your bot's username
-        if (botUsername === "YOUR_BOT_USERNAME") {
-            tg.showAlert("Bot username is not set. Please contact support.");
-            return;
-        }
+        const botUsername = "xspin_income_bot";
         const referralLink = `https://t.me/${botUsername}?start=${userId}`;
         tg.showPopup({
             title: 'Your Referral Link',
@@ -298,14 +294,34 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         updateUI();
 
-        // Ad Buttons
-        buttons.ri1.addEventListener('click', () => handleAd([buttons.ri1], 'ri1', () => show_9671872(), 5, 'interstitial'));
-        buttons.ri2.addEventListener('click', () => handleAd([buttons.ri2], 'ri2', () => show_9671872(), 5, 'interstitial'));
-        buttons.ri3.addEventListener('click', () => handleAd([buttons.ri3], 'ri3', () => show_9671872(), 5, 'interstitial'));
-        const sharedPopupHandler = () => handleAd([buttons.rp1, buttons.rp2], 'rp_shared', () => show_9671872('pop'), 5, 'popup');
-        buttons.rp1.addEventListener('click', sharedPopupHandler);
-        buttons.rp2.addEventListener('click', sharedPopupHandler);
-        buttons.inApp.addEventListener('click', () => handleAd([buttons.inApp], null, () => show_9671872({ type: 'inApp' }), 10, 'inApp'));
+        // Ad Buttons - Attach listeners only if the ad SDK has loaded successfully
+        if (window.show_9671872) {
+            buttons.ri1.addEventListener('click', () => handleAd([buttons.ri1], 'ri1', () => window.show_9671872(), 5, 'interstitial'));
+            buttons.ri2.addEventListener('click', () => handleAd([buttons.ri2], 'ri2', () => window.show_9671872(), 5, 'interstitial'));
+            buttons.ri3.addEventListener('click', () => handleAd([buttons.ri3], 'ri3', () => window.show_9671872(), 5, 'interstitial'));
+
+            const sharedPopupHandler = () => handleAd([buttons.rp1, buttons.rp2], 'rp_shared', () => window.show_9671872('pop'), 5, 'popup');
+            buttons.rp1.addEventListener('click', sharedPopupHandler);
+            buttons.rp2.addEventListener('click', sharedPopupHandler);
+
+            buttons.inApp.addEventListener('click', () => handleAd([buttons.inApp], null, () => window.show_9671872({
+                type: 'inApp',
+                inAppSettings: {
+                    frequency: 2,
+                    capping: 0.1,
+                    interval: 30,
+                    timeout: 5,
+                    everyPage: false
+                }
+            }), 10, 'inApp'));
+        } else {
+            console.error("Monetag SDK function (show_9671872) not found. Ads will not work. This is likely due to an ad blocker.");
+            // Optionally, disable all ad buttons and show a message
+            [buttons.ri1, buttons.ri2, buttons.ri3, buttons.rp1, buttons.rp2, buttons.inApp].forEach(btn => {
+                btn.disabled = true;
+                btn.textContent = "Ad Blocked";
+            });
+        }
 
         // Feature Buttons
         buttons.refer.addEventListener('click', referFriend);
