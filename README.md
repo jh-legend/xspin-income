@@ -3,10 +3,10 @@
 This repository contains the complete, unified code for the "2x Spin Income" Telegram Mini App. It combines a multi-feature frontend with a secure, server-side backend for ad reward validation.
 
 ## Key Features
-- **Multiple Ad Formats:** Supports Rewarded Interstitial, Rewarded Popup, and In-App Interstitial ads from Monetag, each with its own logic.
+- **Multiple Ad Formats:** Supports Rewarded Interstitial, Rewarded Popup, and In-App Interstitial ads from Monetag, each with its own logic and cooldowns.
 - **Secure Ad Rewards:** Uses a Firebase Cloud Function backend to validate ad completions via server-to-server postbacks, preventing cheating.
 - **Firebase Persistence:** All user data, including TK balance, referrals, and ad cooldowns, is stored securely in Firestore.
-- **Telegram-Native Referrals:** Implements a referral system using official `t.me` deep links.
+- **Telegram-Native Referrals:** Implements a referral system using official `t.me` deep links. The bot username is pre-configured.
 - **Additional Games:** Includes a "Spin and Earn" wheel and a withdrawal system with form submission.
 
 ---
@@ -19,23 +19,17 @@ Follow these steps carefully to get your application running. This project has t
 
 The frontend consists of the `index.html`, `style.css`, and `app.js` files. You will host these for free using GitHub Pages.
 
-1.  **Set Your Bot Username:**
-    -   Open the `app.js` file.
-    -   Find the line `const botUsername = "YOUR_BOT_USERNAME";`
-    -   Replace `"YOUR_BOT_USERNAME"` with your actual bot's username (e.g., `"xspin_income_bot"`). **Do not include the `@` symbol.**
-    -   Save the file.
-
-2.  **Create a GitHub Repository:**
+1.  **Create a GitHub Repository:**
     -   Go to [GitHub](https://github.com/) and create a new **public** repository.
-    -   Upload all the project files and the `functions` directory to this repository.
+    -   Upload all the project files and the `functions` directory to this repository. (Your bot username has already been set in `app.js`).
 
-3.  **Enable GitHub Pages:**
+2.  **Enable GitHub Pages:**
     -   In your repository, go to the **Settings** tab.
     -   On the left menu, click on **Pages**.
     -   Under "Build and deployment", select **Deploy from a branch**.
     -   Choose your `main` branch and keep the folder as `/ (root)`. Click **Save**.
 
-4.  **Get Your App's URL:**
+3.  **Get Your App's URL:**
     -   After a minute, GitHub will provide you with the public URL for your Mini App (e.g., `https://your-username.github.io/your-repo-name/`).
     -   This is your **WebApp URL**. You will link this URL to your Telegram Bot using BotFather.
 
@@ -44,7 +38,7 @@ The frontend consists of the `index.html`, `style.css`, and `app.js` files. You 
 The backend is a Node.js function that you will deploy to Firebase Cloud Functions.
 
 **Prerequisites:**
-- You must have **Node.js** installed on your computer. You can get it from [nodejs.org](https://nodejs.org/).
+- You must have **Node.js** (version 16) installed on your computer. You can get it from [nodejs.org](https://nodejs.org/).
 - You must have the **Firebase CLI** installed (`npm install -g firebase-tools`).
 
 **Deployment Steps:**
