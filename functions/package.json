@@ -1,6 +1,6 @@
 {
   "name": "2x-spin-income-functions",
-  "description": "Cloud Functions for 2x Spin Income",
+  "description": "Cloud Functions for the 2x Spin Income Telegram Mini App",
   "main": "index.js",
   "dependencies": {
     "firebase-admin": "^11.8.0",

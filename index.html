@@ -3,128 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monetag Ads Reward System</title>
-    <script src='//libtl.com/sdk.js' data-zone='9671872' data-sdk='show_9671872'></script>
-    <style>
-        :root {
-            --dark-bg: #1a202c;
-            --card-bg: #2d3748;
-            --text-color: #e2e8f0;
-            --green-accent: #48bb78;
-            --green-accent-dark: #2f855a;
-            --gray-text: #a0aec0;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background-color: var(--dark-bg);
-            color: var(--text-color);
-            margin: 0;
-            padding: 1rem;
-            display: flex;
-            justify-content: center;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 600px;
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-        }
-
-        .header {
-            background-color: var(--card-bg);
-            padding: 1rem 1.5rem;
-            border-radius: 0.75rem;
-            text-align: center;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .header h1 {
-            margin: 0;
-            font-size: 1.25rem;
-            color: var(--green-accent);
-        }
-
-        .header #points-display {
-            font-size: 2.5rem;
-            font-weight: bold;
-            margin-top: 0.5rem;
-        }
-
-        .ad-section {
-            background-color: var(--card-bg);
-            padding: 1.5rem;
-            border-radius: 0.75rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .ad-section h2 {
-            margin-top: 0;
-            border-bottom: 2px solid var(--green-accent);
-            padding-bottom: 0.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .button-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 1rem;
-        }
-
-        .button-wrapper {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .btn {
-            width: 100%;
-            padding: 0.75rem 1rem;
-            font-size: 1rem;
-            font-weight: bold;
-            color: white;
-            border: none;
-            border-radius: 0.5rem;
-            cursor: pointer;
-            transition: transform 0.2s, background-color 0.3s;
-            background: linear-gradient(to right, var(--green-accent-dark), var(--green-accent));
-            background-size: 200% auto;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            background-position: right center;
-        }
-
-        .btn:disabled {
-            background: #4a5568;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .timer {
-            text-align: center;
-            font-size: 0.875rem;
-            color: var(--gray-text);
-            height: 1.25rem; /* Reserve space to prevent layout shift */
-        }
-    </style>
+    <title>2x Spin Income</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Monetag and Telegram SDKs will be included before the closing body tag -->
 </head>
 <body>
 
-    <div class="container">
-        <header class="header">
-            <h1>Total Points</h1>
-            <p id="points-display">0</p>
+    <div id="app-container">
+        <!-- Header Card -->
+        <header class="header-card">
+            <h1>Your Balance</h1>
+            <div class="balance-display">
+                <div>
+                    <p class="balance-value"><span id="tk-display">0</span> TK</p>
+                </div>
+                <div>
+                    <p class="balance-value"><span id="referral-display">0</span></p>
+                    <p class="balance-label">Referrals</p>
+                </div>
+            </div>
         </header>
 
-        <main>
+        <main class="main-content">
             <!-- Section 1: Rewarded Interstitial Ads -->
             <section class="ad-section">
-                <h2>Rewarded Interstitial Ads (+5 Points)</h2>
-                <p class="timer-info" style="color: var(--gray-text); font-size: 0.9rem; margin-bottom: 1rem;">Each button has a separate 10-minute cooldown.</p>
+                <h2>Rewarded Interstitial Ads (+5 TK)</h2>
+                <p class="section-desc">Each button has a separate 10-minute cooldown.</p>
                 <div class="button-grid">
                     <div class="button-wrapper">
                         <button class="btn" id="rewarded-interstitial-1">Ad 1</button>
@@ -143,192 +47,120 @@
 
             <!-- Section 2: Rewarded Popup Ads -->
             <section class="ad-section">
-                <h2>Rewarded Popup Ads (+5 Points)</h2>
-                 <p class="timer-info" style="color: var(--gray-text); font-size: 0.9rem; margin-bottom: 1rem;">These buttons share a single 10-minute cooldown.</p>
+                <h2>Rewarded Popup Ads (+5 TK)</h2>
+                <p class="section-desc">These buttons share a single 10-minute cooldown.</p>
                 <div class="button-grid">
                     <div class="button-wrapper">
                         <button class="btn" id="rewarded-popup-1">Popup Ad 1</button>
                     </div>
-                     <div class="button-wrapper">
+                    <div class="button-wrapper">
                         <button class="btn" id="rewarded-popup-2">Popup Ad 2</button>
                     </div>
                 </div>
-                 <div class="timer" id="timer-rp-shared"></div>
+                <div class="timer" id="timer-rp-shared"></div>
             </section>
 
-            <!-- Section 3: In-App Interstitial Ads -->
+            <!-- Section 3: In-App Interstitial Ad -->
             <section class="ad-section">
-                <h2>In-App Interstitial Ad (+10 Points)</h2>
-                 <p class="timer-info" style="color: var(--gray-text); font-size: 0.9rem; margin-bottom: 1rem;">No time limit for this ad.</p>
-                <div class="button-grid">
+                <h2>In-App Interstitial Ad (+10 TK)</h2>
+                <p class="section-desc">No time limit for this ad.</p>
+                <div class="button-grid-single">
                     <div class="button-wrapper">
                         <button class="btn" id="in-app-interstitial">Watch In-App Interstitial</button>
                     </div>
                 </div>
             </section>
+
+            <!-- Other Features Section -->
+            <section class="ad-section">
+                 <h2>Other Features</h2>
+                 <div class="button-grid">
+                    <div class="button-wrapper">
+                        <button class="btn btn-purple" id="spin-earn-btn">Spin and Earn</button>
+                    </div>
+                    <div class="button-wrapper">
+                        <button class="btn btn-red" id="withdraw-btn">Withdraw Now</button>
+                    </div>
+                    <div class="button-wrapper">
+                         <button class="btn btn-green" id="refer-btn">Refer a Friend</button>
+                    </div>
+                    <div class="button-wrapper">
+                        <button class="btn btn-gray" id="guide-btn">How to Income</button>
+                    </div>
+                 </div>
+            </section>
         </main>
     </div>
 
-    <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        // --- CONFIGURATION ---
-        const COOLDOWN_MINUTES = 10;
-        const COOLDOWN_MS = COOLDOWN_MINUTES * 60 * 1000;
+    <!-- Modals -->
+    <div id="spin-modal" class="modal-backdrop hidden">
+        <div class="modal-content">
+            <h2 class="modal-title">Spin the Wheel!</h2>
+            <p class="modal-desc">You can spin once every 2 hours.</p>
+            <div class="wheel-container-wrapper">
+                <div class="wheel-pointer"></div>
+                <div id="wheel" class="wheel-container"></div>
+            </div>
+            <p id="spin-result" class="spin-result"></p>
+            <button id="spin-btn" class="btn btn-purple">Spin</button>
+            <button id="close-spin-modal" class="modal-close-btn">Close</button>
+        </div>
+    </div>
 
-        // --- LOCAL STORAGE KEYS ---
-        const LS_KEYS = {
-            POINTS: 'monetag_points',
-            REWARDED_INTERSTITIAL_1: 'cooldown_ri_1',
-            REWARDED_INTERSTITIAL_2: 'cooldown_ri_2',
-            REWARDED_INTERSTITIAL_3: 'cooldown_ri_3',
-            REWARDED_POPUP_SHARED: 'cooldown_rp_shared'
-        };
+    <div id="guide-modal" class="modal-backdrop hidden">
+        <div class="modal-content">
+            <h2 class="modal-title">How to Income Guide</h2>
+            <div class="guide-content">
+                <h3>Earning Rules (English)</h3>
+                <ul>
+                    <li>Watch various ads to earn 5 or 10 TK per view.</li>
+                    <li>Some ads have cooldowns; please wait for the timer to finish.</li>
+                    <li>Share your referral link to earn 10 TK for each new user.</li>
+                    <li>Spin the wheel every 2 hours to win random TK.</li>
+                    <li>Withdrawal is available after earning 50 TK and referring 5 friends.</li>
+                </ul>
+                <hr>
+                <h3>আয়ের নিয়মাবলী (Bangla)</h3>
+                 <ul>
+                    <li>বিভিন্ন বিজ্ঞাপন দেখে প্রতি ভিউতে ৫ বা ১০ টাকা উপার্জন করুন।</li>
+                    <li>কিছু বিজ্ঞাপনে কুলডাউন আছে; টাইমার শেষ হওয়ার জন্য অপেক্ষা করুন।</li>
+                    <li>আপনার রেফারেল লিঙ্ক শেয়ার করে প্রতিটি নতুন ব্যবহারকারীর জন্য ১০ টাকা উপার্জন করুন।</li>
+                    <li>প্রতি ২ ঘন্টা পর পর চাকা ঘুরিয়ে র‍্যান্ডম টাকা জিতে নিন।</li>
+                    <li>৫০ টাকা উপার্জন এবং ৫ জন বন্ধুকে রেফার করার পরে টাকা তোলার সুযোগ পাবেন।</li>
+                </ul>
+            </div>
+            <button id="close-guide-modal" class="modal-close-btn">Close</button>
+        </div>
+    </div>
 
-        // --- DOM ELEMENTS ---
-        const pointsDisplay = document.getElementById('points-display');
-        const buttons = {
-            ri1: document.getElementById('rewarded-interstitial-1'),
-            ri2: document.getElementById('rewarded-interstitial-2'),
-            ri3: document.getElementById('rewarded-interstitial-3'),
-            rp1: document.getElementById('rewarded-popup-1'),
-            rp2: document.getElementById('rewarded-popup-2'),
-            inApp: document.getElementById('in-app-interstitial')
-        };
-        const timers = {
-            ri1: document.getElementById('timer-ri-1'),
-            ri2: document.getElementById('timer-ri-2'),
-            ri3: document.getElementById('timer-ri-3'),
-            rpShared: document.getElementById('timer-rp-shared')
-        };
+    <div id="withdraw-modal" class="modal-backdrop hidden">
+        <div class="modal-content">
+            <h2 class="modal-title">Withdraw Request</h2>
+            <form id="withdraw-form" class="form">
+                <div class="form-group">
+                    <label for="withdraw-name">Full Name</label>
+                    <input type="text" id="withdraw-name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="withdraw-method">Payment Method</label>
+                    <select id="withdraw-method" name="method" required>
+                        <option>bKash</option>
+                        <option>Nagad</option>
+                        <option>Rocket</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="withdraw-number">Payment Number</label>
+                    <input type="text" id="withdraw-number" name="number" required>
+                </div>
+                <button type="submit" id="submit-withdraw-btn" class="btn btn-red">Submit Request</button>
+            </form>
+            <button id="close-withdraw-modal" class="modal-close-btn">Cancel</button>
+        </div>
+    </div>
 
-        let activeTimers = {};
-
-        // --- DATA MANAGEMENT ---
-        const getPoints = () => parseInt(localStorage.getItem(LS_KEYS.POINTS) || '0', 10);
-        const setPoints = (newPoints) => {
-            localStorage.setItem(LS_KEYS.POINTS, newPoints);
-            updatePointsDisplay();
-        };
-        const addPoints = (amount) => setPoints(getPoints() + amount);
-        const getCooldown = (key) => parseInt(localStorage.getItem(key) || '0', 10);
-        const setCooldown = (key) => localStorage.setItem(key, Date.now() + COOLDOWN_MS);
-
-        // --- UI & TIMER LOGIC ---
-        const updatePointsDisplay = () => pointsDisplay.textContent = getPoints();
-
-        const formatTime = (ms) => {
-            const totalSeconds = Math.floor(ms / 1000);
-            const minutes = Math.floor(totalSeconds / 60);
-            const seconds = totalSeconds % 60;
-            return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-        };
-
-        const updateTimer = (key, timerEl, buttonEls) => {
-            const endTime = getCooldown(key);
-            const now = Date.now();
-            const timeLeft = endTime - now;
-
-            if (timeLeft <= 0) {
-                timerEl.textContent = '';
-                buttonEls.forEach(btn => btn.disabled = false);
-                clearInterval(activeTimers[key]);
-                delete activeTimers[key];
-                return;
-            }
-
-            buttonEls.forEach(btn => btn.disabled = true);
-            timerEl.textContent = `Please wait: ${formatTime(timeLeft)}`;
-        };
-
-        const startCooldownTimer = (key, timerEl, buttonEls) => {
-            if (activeTimers[key]) clearInterval(activeTimers[key]);
-
-            updateTimer(key, timerEl, buttonEls); // Initial update
-            activeTimers[key] = setInterval(() => {
-                updateTimer(key, timerEl, buttonEls);
-            }, 1000);
-        };
-
-        // --- AD HANDLING ---
-        const handleAd = (buttonEls, cooldownKey, timerEl, adFunction, points) => {
-            const endTime = getCooldown(cooldownKey);
-            if (Date.now() < endTime) {
-                // Already on cooldown, do nothing. The timer is already running.
-                return;
-            }
-
-            buttonEls.forEach(btn => btn.disabled = true);
-
-            adFunction().then(() => {
-                addPoints(points);
-                if (cooldownKey) {
-                    setCooldown(cooldownKey);
-                    startCooldownTimer(cooldownKey, timerEl, buttonEls);
-                } else {
-                    // For ads without cooldown, re-enable button immediately.
-                     buttonEls.forEach(btn => btn.disabled = false);
-                }
-            }).catch(() => {
-                console.error('Ad failed to show or was closed early.');
-                // Re-enable button on error so user can try again.
-                buttonEls.forEach(btn => btn.disabled = false);
-            });
-        };
-
-        // --- INITIALIZATION ---
-        const initializePage = () => {
-            // 1. Set initial points display
-            updatePointsDisplay();
-
-            // 2. Check and start timers for any active cooldowns on page load
-            const allCooldowns = [
-                { key: LS_KEYS.REWARDED_INTERSTITIAL_1, timerEl: timers.ri1, buttons: [buttons.ri1] },
-                { key: LS_KEYS.REWARDED_INTERSTITIAL_2, timerEl: timers.ri2, buttons: [buttons.ri2] },
-                { key: LS_KEYS.REWARDED_INTERSTITIAL_3, timerEl: timers.ri3, buttons: [buttons.ri3] },
-                { key: LS_KEYS.REWARDED_POPUP_SHARED, timerEl: timers.rpShared, buttons: [buttons.rp1, buttons.rp2] }
-            ];
-
-            allCooldowns.forEach(cd => {
-                if (Date.now() < getCooldown(cd.key)) {
-                    startCooldownTimer(cd.key, cd.timerEl, cd.buttons);
-                }
-            });
-        };
-
-        // --- EVENT LISTENERS ---
-        // This is a placeholder for the actual Monetag SDK function.
-        // Replace with the real function if it's different.
-        const show_9671872 = window.show_9671872 || function(options) {
-            console.log('Showing ad with options:', options);
-            return new Promise((resolve, reject) => {
-                // Simulate a successful ad view after 2 seconds
-                setTimeout(() => resolve(), 2000);
-            });
-        };
-
-        buttons.ri1.addEventListener('click', () => handleAd(
-            [buttons.ri1], LS_KEYS.REWARDED_INTERSTITIAL_1, timers.ri1, () => show_9671872(), 5
-        ));
-        buttons.ri2.addEventListener('click', () => handleAd(
-            [buttons.ri2], LS_KEYS.REWARDED_INTERSTITIAL_2, timers.ri2, () => show_9671872(), 5
-        ));
-        buttons.ri3.addEventListener('click', () => handleAd(
-            [buttons.ri3], LS_KEYS.REWARDED_INTERSTITIAL_3, timers.ri3, () => show_9671872(), 5
-        ));
-
-        const handleSharedPopupAd = () => handleAd(
-            [buttons.rp1, buttons.rp2], LS_KEYS.REWARDED_POPUP_SHARED, timers.rpShared, () => show_9671872('pop'), 5
-        );
-        buttons.rp1.addEventListener('click', handleSharedPopupAd);
-        buttons.rp2.addEventListener('click', handleSharedPopupAd);
-
-        buttons.inApp.addEventListener('click', () => handleAd(
-            [buttons.inApp], null, null, () => show_9671872({ type: 'inApp' }), 10
-        ));
-
-        // --- START THE APP ---
-        initializePage();
-    });
-    </script>
+    <script src='//libtl.com/sdk.js' data-zone='9671872' data-sdk='show_9671872'></script>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="app.js" type="module"></script>
 </body>
 </html>
