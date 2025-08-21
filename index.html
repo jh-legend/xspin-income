@@ -3,142 +3,332 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2x Spin Income</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="style.css">
+    <title>Monetag Ads Reward System</title>
     <script src='//libtl.com/sdk.js' data-zone='9671872' data-sdk='show_9671872'></script>
+    <style>
+        :root {
+            --dark-bg: #1a202c;
+            --card-bg: #2d3748;
+            --text-color: #e2e8f0;
+            --green-accent: #48bb78;
+            --green-accent-dark: #2f855a;
+            --gray-text: #a0aec0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--dark-bg);
+            color: var(--text-color);
+            margin: 0;
+            padding: 1rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .header {
+            background-color: var(--card-bg);
+            padding: 1rem 1.5rem;
+            border-radius: 0.75rem;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.25rem;
+            color: var(--green-accent);
+        }
+
+        .header #points-display {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-top: 0.5rem;
+        }
+
+        .ad-section {
+            background-color: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .ad-section h2 {
+            margin-top: 0;
+            border-bottom: 2px solid var(--green-accent);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+
+        .button-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            font-weight: bold;
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.3s;
+            background: linear-gradient(to right, var(--green-accent-dark), var(--green-accent));
+            background-size: 200% auto;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            background-position: right center;
+        }
+
+        .btn:disabled {
+            background: #4a5568;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .timer {
+            text-align: center;
+            font-size: 0.875rem;
+            color: var(--gray-text);
+            height: 1.25rem; /* Reserve space to prevent layout shift */
+        }
+    </style>
 </head>
-<body class="bg-gray-900 text-white font-sans antialiased">
+<body>
 
-    <div id="app-container" class="max-w-md mx-auto p-4 space-y-6">
-        <!-- Header Card -->
-        <div class="bg-gray-800 rounded-xl p-5 text-center shadow-lg">
-            <h1 class="text-xl font-bold text-cyan-400">Your Balance</h1>
-            <div class="flex justify-around items-center mt-2">
-                <div>
-                    <p class="text-3xl font-mono font-bold"><span id="points-display">0</span></p>
-                    <p class="text-sm text-gray-400">Points</p>
+    <div class="container">
+        <header class="header">
+            <h1>Total Points</h1>
+            <p id="points-display">0</p>
+        </header>
+
+        <main>
+            <!-- Section 1: Rewarded Interstitial Ads -->
+            <section class="ad-section">
+                <h2>Rewarded Interstitial Ads (+5 Points)</h2>
+                <p class="timer-info" style="color: var(--gray-text); font-size: 0.9rem; margin-bottom: 1rem;">Each button has a separate 10-minute cooldown.</p>
+                <div class="button-grid">
+                    <div class="button-wrapper">
+                        <button class="btn" id="rewarded-interstitial-1">Ad 1</button>
+                        <div class="timer" id="timer-ri-1"></div>
+                    </div>
+                    <div class="button-wrapper">
+                        <button class="btn" id="rewarded-interstitial-2">Ad 2</button>
+                        <div class="timer" id="timer-ri-2"></div>
+                    </div>
+                    <div class="button-wrapper">
+                        <button class="btn" id="rewarded-interstitial-3">Ad 3</button>
+                        <div class="timer" id="timer-ri-3"></div>
+                    </div>
                 </div>
-                <div>
-                    <p class="text-3xl font-mono font-bold"><span id="referral-display">0</span></p>
-                    <p class="text-sm text-gray-400">Referrals</p>
+            </section>
+
+            <!-- Section 2: Rewarded Popup Ads -->
+            <section class="ad-section">
+                <h2>Rewarded Popup Ads (+5 Points)</h2>
+                 <p class="timer-info" style="color: var(--gray-text); font-size: 0.9rem; margin-bottom: 1rem;">These buttons share a single 10-minute cooldown.</p>
+                <div class="button-grid">
+                    <div class="button-wrapper">
+                        <button class="btn" id="rewarded-popup-1">Popup Ad 1</button>
+                    </div>
+                     <div class="button-wrapper">
+                        <button class="btn" id="rewarded-popup-2">Popup Ad 2</button>
+                    </div>
                 </div>
-            </div>
-        </div>
+                 <div class="timer" id="timer-rp-shared"></div>
+            </section>
 
-        <!-- Main Actions Card -->
-        <div class="bg-gray-800 rounded-xl p-5 shadow-lg space-y-4">
-            <h2 class="text-lg font-semibold mb-3 text-center">Main Actions</h2>
-            <button id="watch-ad-btn" class="w-full flex items-center justify-center text-white font-bold py-3 px-4 rounded-lg shadow-md transition-transform transform hover:scale-105 btn-gradient btn-blue">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.55a2 2 0 010 3.1l-4.55 2.55M4 12h11" /></svg>
-                Watch Ad (+5 Points)
-            </button>
-            <button id="refer-btn" class="w-full flex items-center justify-center text-white font-bold py-3 px-4 rounded-lg shadow-md transition-transform transform hover:scale-105 btn-gradient btn-green">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M15 21v-1a6 6 0 00-5.197-5.975" /></svg>
-                Refer a Friend (+10 Points)
-            </button>
-        </div>
-
-        <!-- More Ways to Earn Card -->
-        <div class="bg-gray-800 rounded-xl p-5 shadow-lg space-y-4">
-             <h2 class="text-lg font-semibold mb-3 text-center">Bonus Rewards</h2>
-            <button id="spin-earn-btn" class="w-full flex items-center justify-center text-white font-bold py-3 px-4 rounded-lg shadow-md transition-transform transform hover:scale-105 btn-gradient btn-purple">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                Spin and Earn
-            </button>
-            <button id="guide-btn" class="w-full flex items-center justify-center text-white font-bold py-3 px-4 rounded-lg shadow-md transition-transform transform hover:scale-105 btn-gradient btn-gray">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                How to Income Guide
-            </button>
-        </div>
-
-        <!-- Withdraw Card -->
-        <div class="bg-gray-800 rounded-xl p-5 shadow-lg">
-             <h2 class="text-lg font-semibold mb-3 text-center">Withdraw</h2>
-            <button id="withdraw-btn" class="w-full flex items-center justify-center text-white font-bold py-3 px-4 rounded-lg shadow-md transition-transform transform hover:scale-105 btn-gradient btn-red">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
-                Withdraw Now
-            </button>
-        </div>
+            <!-- Section 3: In-App Interstitial Ads -->
+            <section class="ad-section">
+                <h2>In-App Interstitial Ad (+10 Points)</h2>
+                 <p class="timer-info" style="color: var(--gray-text); font-size: 0.9rem; margin-bottom: 1rem;">No time limit for this ad.</p>
+                <div class="button-grid">
+                    <div class="button-wrapper">
+                        <button class="btn" id="in-app-interstitial">Watch In-App Interstitial</button>
+                    </div>
+                </div>
+            </section>
+        </main>
     </div>
 
-    <!-- Spin and Earn Modal -->
-    <div id="spin-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-backdrop">
-        <div class="bg-gray-800 rounded-2xl p-6 shadow-2xl text-center w-11/12 max-w-sm">
-            <h2 class="text-2xl font-bold mb-4">Spin the Wheel!</h2>
-            <p class="text-gray-400 mb-6">You can spin once every 2 hours.</p>
-            <div class="relative flex items-center justify-center mb-6">
-                <div class="wheel-pointer"></div>
-                <div id="wheel" class="wheel-container"></div>
-            </div>
-            <p id="spin-result" class="text-xl font-bold h-8 mb-4"></p>
-            <button id="spin-btn" class="w-full text-white font-bold py-3 px-4 rounded-lg shadow-md btn-gradient btn-purple disabled:opacity-50 disabled:cursor-not-allowed">
-                Spin
-            </button>
-            <button id="close-spin-modal" class="mt-4 text-gray-400 hover:text-white">Close</button>
-        </div>
-    </div>
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- CONFIGURATION ---
+        const COOLDOWN_MINUTES = 10;
+        const COOLDOWN_MS = COOLDOWN_MINUTES * 60 * 1000;
 
-    <!-- How to Income Guide Modal -->
-    <div id="guide-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-backdrop">
-        <div class="bg-gray-800 rounded-2xl p-6 shadow-2xl w-11/12 max-w-lg max-h-[80vh] overflow-y-auto">
-            <h2 class="text-2xl font-bold mb-4 text-center">How to Income Guide</h2>
-            <div class="space-y-4 text-gray-300">
-                <!-- Guide content remains the same -->
-                 <div>
-                    <h3 class="font-semibold text-lg text-cyan-400">Earning Rules (English)</h3>
-                    <ul class="list-disc list-inside mt-2 space-y-1">
-                        <li><strong>Watch Ad:</strong> Click to watch an ad and earn 5 points instantly.</li>
-                        <li><strong>Refer a Friend:</strong> Share your `t.me` link. You get 10 points for each new user who joins via your bot link.</li>
-                        <li><strong>Spin and Earn:</strong> Spin the wheel every 2 hours to win random points.</li>
-                        <li><strong>Withdrawal:</strong> You need at least 50 points and 5 referrals to request a withdrawal.</li>
-                    </ul>
-                </div>
-                <hr class="border-gray-600">
-                <div>
-                    <h3 class="font-semibold text-lg text-cyan-400">আয়ের নিয়মাবলী (Bangla)</h3>
-                    <ul class="list-disc list-inside mt-2 space-y-1">
-                        <li><strong>বিজ্ঞাপন দেখুন:</strong> বিজ্ঞাপনে ক্লিক করে तुरंत ৫ পয়েন্ট উপার্জন করুন।</li>
-                        <li><strong>বন্ধু রেফার করুন:</strong> আপনার `t.me` লিঙ্ক শেয়ার করুন। প্রতিটি নতুন ব্যবহারকারীর জন্য আপনি ১০ পয়েন্ট পাবেন।</li>
-                        <li><strong>স্পিন এবং উপার্জন:</strong> প্রতি ২ ঘন্টা পর পর চাকা ঘুরিয়ে র‍্যান্ডম পয়েন্ট জিতে নিন।</li>
-                        <li><strong>উত্তোলন:</strong> টাকা তোলার জন্য আপনার কমপক্ষে ৫০ পয়েন্ট এবং ৫টি রেফারেল প্রয়োজন।</li>
-                    </ul>
-                </div>
-            </div>
-            <button id="close-guide-modal" class="mt-6 w-full text-white font-bold py-2 px-4 rounded-lg btn-gradient btn-gray">Close</button>
-        </div>
-    </div>
+        // --- LOCAL STORAGE KEYS ---
+        const LS_KEYS = {
+            POINTS: 'monetag_points',
+            REWARDED_INTERSTITIAL_1: 'cooldown_ri_1',
+            REWARDED_INTERSTITIAL_2: 'cooldown_ri_2',
+            REWARDED_INTERSTITIAL_3: 'cooldown_ri_3',
+            REWARDED_POPUP_SHARED: 'cooldown_rp_shared'
+        };
 
-    <!-- Withdraw Form Modal -->
-    <div id="withdraw-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-backdrop">
-        <div class="bg-gray-800 rounded-2xl p-6 shadow-2xl w-11/12 max-w-sm">
-            <h2 class="text-2xl font-bold mb-4 text-center">Withdraw Request</h2>
-            <form id="withdraw-form" class="space-y-4">
-                <div>
-                    <label for="withdraw-name" class="block text-sm font-medium text-gray-300">Full Name</label>
-                    <input type="text" id="withdraw-name" name="name" required class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-cyan-500 focus:border-cyan-500">
-                </div>
-                <div>
-                    <label for="withdraw-method" class="block text-sm font-medium text-gray-300">Payment Method</label>
-                    <select id="withdraw-method" name="method" required class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-cyan-500 focus:border-cyan-500">
-                        <option>bKash</option>
-                        <option>Nagad</option>
-                        <option>Rocket</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="withdraw-number" class="block text-sm font-medium text-gray-300">Payment Number</label>
-                    <input type="text" id="withdraw-number" name="number" required class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-cyan-500 focus:border-cyan-500">
-                </div>
-                <div class="pt-2">
-                    <button type="submit" id="submit-withdraw-btn" class="w-full text-white font-bold py-3 px-4 rounded-lg shadow-md btn-gradient btn-red">Submit Request</button>
-                </div>
-            </form>
-            <button id="close-withdraw-modal" class="mt-4 text-gray-400 hover:text-white w-full">Cancel</button>
-        </div>
-    </div>
+        // --- DOM ELEMENTS ---
+        const pointsDisplay = document.getElementById('points-display');
+        const buttons = {
+            ri1: document.getElementById('rewarded-interstitial-1'),
+            ri2: document.getElementById('rewarded-interstitial-2'),
+            ri3: document.getElementById('rewarded-interstitial-3'),
+            rp1: document.getElementById('rewarded-popup-1'),
+            rp2: document.getElementById('rewarded-popup-2'),
+            inApp: document.getElementById('in-app-interstitial')
+        };
+        const timers = {
+            ri1: document.getElementById('timer-ri-1'),
+            ri2: document.getElementById('timer-ri-2'),
+            ri3: document.getElementById('timer-ri-3'),
+            rpShared: document.getElementById('timer-rp-shared')
+        };
 
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="app.js" type="module"></script>
+        let activeTimers = {};
+
+        // --- DATA MANAGEMENT ---
+        const getPoints = () => parseInt(localStorage.getItem(LS_KEYS.POINTS) || '0', 10);
+        const setPoints = (newPoints) => {
+            localStorage.setItem(LS_KEYS.POINTS, newPoints);
+            updatePointsDisplay();
+        };
+        const addPoints = (amount) => setPoints(getPoints() + amount);
+        const getCooldown = (key) => parseInt(localStorage.getItem(key) || '0', 10);
+        const setCooldown = (key) => localStorage.setItem(key, Date.now() + COOLDOWN_MS);
+
+        // --- UI & TIMER LOGIC ---
+        const updatePointsDisplay = () => pointsDisplay.textContent = getPoints();
+
+        const formatTime = (ms) => {
+            const totalSeconds = Math.floor(ms / 1000);
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        };
+
+        const updateTimer = (key, timerEl, buttonEls) => {
+            const endTime = getCooldown(key);
+            const now = Date.now();
+            const timeLeft = endTime - now;
+
+            if (timeLeft <= 0) {
+                timerEl.textContent = '';
+                buttonEls.forEach(btn => btn.disabled = false);
+                clearInterval(activeTimers[key]);
+                delete activeTimers[key];
+                return;
+            }
+
+            buttonEls.forEach(btn => btn.disabled = true);
+            timerEl.textContent = `Please wait: ${formatTime(timeLeft)}`;
+        };
+
+        const startCooldownTimer = (key, timerEl, buttonEls) => {
+            if (activeTimers[key]) clearInterval(activeTimers[key]);
+
+            updateTimer(key, timerEl, buttonEls); // Initial update
+            activeTimers[key] = setInterval(() => {
+                updateTimer(key, timerEl, buttonEls);
+            }, 1000);
+        };
+
+        // --- AD HANDLING ---
+        const handleAd = (buttonEls, cooldownKey, timerEl, adFunction, points) => {
+            const endTime = getCooldown(cooldownKey);
+            if (Date.now() < endTime) {
+                // Already on cooldown, do nothing. The timer is already running.
+                return;
+            }
+
+            buttonEls.forEach(btn => btn.disabled = true);
+
+            adFunction().then(() => {
+                addPoints(points);
+                if (cooldownKey) {
+                    setCooldown(cooldownKey);
+                    startCooldownTimer(cooldownKey, timerEl, buttonEls);
+                } else {
+                    // For ads without cooldown, re-enable button immediately.
+                     buttonEls.forEach(btn => btn.disabled = false);
+                }
+            }).catch(() => {
+                console.error('Ad failed to show or was closed early.');
+                // Re-enable button on error so user can try again.
+                buttonEls.forEach(btn => btn.disabled = false);
+            });
+        };
+
+        // --- INITIALIZATION ---
+        const initializePage = () => {
+            // 1. Set initial points display
+            updatePointsDisplay();
+
+            // 2. Check and start timers for any active cooldowns on page load
+            const allCooldowns = [
+                { key: LS_KEYS.REWARDED_INTERSTITIAL_1, timerEl: timers.ri1, buttons: [buttons.ri1] },
+                { key: LS_KEYS.REWARDED_INTERSTITIAL_2, timerEl: timers.ri2, buttons: [buttons.ri2] },
+                { key: LS_KEYS.REWARDED_INTERSTITIAL_3, timerEl: timers.ri3, buttons: [buttons.ri3] },
+                { key: LS_KEYS.REWARDED_POPUP_SHARED, timerEl: timers.rpShared, buttons: [buttons.rp1, buttons.rp2] }
+            ];
+
+            allCooldowns.forEach(cd => {
+                if (Date.now() < getCooldown(cd.key)) {
+                    startCooldownTimer(cd.key, cd.timerEl, cd.buttons);
+                }
+            });
+        };
+
+        // --- EVENT LISTENERS ---
+        // This is a placeholder for the actual Monetag SDK function.
+        // Replace with the real function if it's different.
+        const show_9671872 = window.show_9671872 || function(options) {
+            console.log('Showing ad with options:', options);
+            return new Promise((resolve, reject) => {
+                // Simulate a successful ad view after 2 seconds
+                setTimeout(() => resolve(), 2000);
+            });
+        };
+
+        buttons.ri1.addEventListener('click', () => handleAd(
+            [buttons.ri1], LS_KEYS.REWARDED_INTERSTITIAL_1, timers.ri1, () => show_9671872(), 5
+        ));
+        buttons.ri2.addEventListener('click', () => handleAd(
+            [buttons.ri2], LS_KEYS.REWARDED_INTERSTITIAL_2, timers.ri2, () => show_9671872(), 5
+        ));
+        buttons.ri3.addEventListener('click', () => handleAd(
+            [buttons.ri3], LS_KEYS.REWARDED_INTERSTITIAL_3, timers.ri3, () => show_9671872(), 5
+        ));
+
+        const handleSharedPopupAd = () => handleAd(
+            [buttons.rp1, buttons.rp2], LS_KEYS.REWARDED_POPUP_SHARED, timers.rpShared, () => show_9671872('pop'), 5
+        );
+        buttons.rp1.addEventListener('click', handleSharedPopupAd);
+        buttons.rp2.addEventListener('click', handleSharedPopupAd);
+
+        buttons.inApp.addEventListener('click', () => handleAd(
+            [buttons.inApp], null, null, () => show_9671872({ type: 'inApp' }), 10
+        ));
+
+        // --- START THE APP ---
+        initializePage();
+    });
+    </script>
 </body>
 </html>
