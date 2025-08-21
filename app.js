@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const wheel = document.getElementById('wheel');
     const spinBtn = document.getElementById('spin-btn');
     const spinResult = document.getElementById('spin-result');
-    const wheelPoints = [3, 20, 5, 40, 10, 25, 15, 5]; // 8 slices
+    const wheelPoints = [5, 10, 15, 20, 25, 40, 3, 5]; // 8 slices
     const sliceColors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2', '#7f7f7f'];
 
     // --- Main App Initialization ---
