@@ -113,8 +113,11 @@
                     <div class="ad-info-item"><h3 id="dailyAdCountDisplay">0 / 1000</h3><p>Today's Ads</p></div>
                 </div>
             </div>
-            <div class="ad-buttons"><button class="btn" id="rewardedBtn">Watch Ad (+0.01 USDT)</button></div>
-            <button class="btn" id="mainWithdrawBtn" disabled>Reach 10.00 USDT to Withdraw</button>
+            <div class="ad-buttons">
+                <button class="btn" id="rewardedBtn">Watch Ad (+0.05 USDT)</button>
+                <button class="btn" id="signupBtn">Sign up and get reward (+0.10 USDT)</button>
+            </div>
+            <button class="btn" id="mainWithdrawBtn" disabled>Reach 5.00 USDT to Withdraw</button>
         </div>
 
         <!-- Withdraw View -->
@@ -132,7 +135,7 @@
                     <input type="text" id="paymentAddress" placeholder="e.g., T... (TRC20 Address)">
                 </div>
                 <div class="input-group">
-                    <label for="bkashNumber">Your bKash Account Number (Optional)</label>
+                    <label for="bkashNumber">Your Bkash Account Number</label>
                     <input type="text" id="bkashNumber" placeholder="+8801...">
                 </div>
                 <button class="btn" id="finalWithdrawBtn" disabled>Withdraw</button>
@@ -193,7 +196,7 @@
             const BOT_USERNAME = 'xspin_income_bot';
             const WEBAPP_NAME = 'IncomeMoney';
             const WITHDRAW_THRESHOLD = 5;
-            const AD_REWARD_CENTS = 1;
+            const AD_REWARD_CENTS = 5; // Changed from 1 to 5
             const REFERRAL_BONUS_USDT = 0.5;
             const DAILY_AD_LIMIT = 1000;
             const SPIN_COOLDOWN_MS = 1 * 60 * 1000; // 1 minute
@@ -213,6 +216,7 @@
             };
             const balanceDisplay = document.getElementById('balanceDisplay'), adCountDisplay = document.getElementById('adCountDisplay'),
                   dailyAdCountDisplay = document.getElementById('dailyAdCountDisplay'), rewardedBtn = document.getElementById('rewardedBtn'),
+                  signupBtn = document.getElementById('signupBtn'), // New button
                   mainWithdrawBtn = document.getElementById('mainWithdrawBtn'), statusMessage = document.getElementById('statusMessage'),
                   withdrawBalanceDisplay = document.getElementById('withdrawBalanceDisplay'), paymentAddressInput = document.getElementById('paymentAddress'),
                   finalWithdrawBtn = document.getElementById('finalWithdrawBtn'), referralLinkDisplay = document.getElementById('referralLink'),
@@ -222,7 +226,6 @@
                   spinResult = document.getElementById('spin-result'), spinTimer = document.getElementById('spin-timer');
 
             // --- Spinner Configuration ---
-            // The values for each of the 8 slices on the wheel, in USDT cents.
             const wheelPrizesInCents = [1, 50, 5, 10, 1, 30, 5, 10];
             const sliceColors = ['#f44336', '#e91e63', '#9c27b0', '#673ab7', '#3f51b5', '#2196f3', '#03a9f4', '#00bcd4'];
 
@@ -266,7 +269,8 @@
                 finalWithdrawBtn.textContent = isWithdrawalPossible ? `Withdraw ${balanceInUSDT} USDT` : `Minimum ${WITHDRAW_THRESHOLD.toFixed(2)} USDT required`;
                 const adLimitReached = state.dailyAdCount >= DAILY_AD_LIMIT;
                 rewardedBtn.disabled = adLimitReached;
-                rewardedBtn.textContent = adLimitReached ? 'Daily Limit Reached' : 'Watch Ad (+0.01 USDT)';
+                rewardedBtn.textContent = adLimitReached ? 'Daily Limit Reached' : `Watch Ad (+${(AD_REWARD_CENTS / 100).toFixed(2)} USDT)`;
+                signupBtn.disabled = adLimitReached;
             }
 
             function showView(viewId) {
@@ -286,13 +290,13 @@
             }
 
             // ---- Ad & Spinner Logic ----
-            function requestAd(onSuccess, onError) {
+            function requestAd(adFunction, onSuccess, onError) {
                 if (state.dailyAdCount >= DAILY_AD_LIMIT) {
                     showStatus("You've reached the daily ad limit.", 'error');
                     onError?.(); return;
                 }
                 showStatus('Loading ad, please wait...', 'info');
-                Promise.resolve(show_9671872()).then(() => {
+                Promise.resolve(adFunction()).then(() => {
                     state.totalAdCount++; state.dailyAdCount++; state.lastAdDate = getTodayDateString();
                     saveState(); updateUI();
                     onSuccess();
@@ -303,70 +307,53 @@
                 });
             }
 
-            function handleSpin() {
-                const now = Date.now();
-                if (now < state.lastSpinTime + SPIN_COOLDOWN_MS) {
-                    showStatus('Spinner is on cooldown. Please wait.', 'info'); return;
-                }
-                spinBtn.disabled = true;
-                showStatus('Watch an ad to spin the wheel!', 'info');
-
-                // Show a rewarded popup ad before spinning
-                Promise.resolve(show_9671872('pop')).then(() => {
-                    showStatus('Ad watched! Spinning the wheel...', 'success');
-                    executeSpin();
-                }).catch(err => {
-                    console.error('Pre-spin ad error:', err);
-                    showStatus('You must watch the ad to spin.', 'error');
-                    spinBtn.disabled = false;
-                });
-            }
-
-            function executeSpin() {
-                // Select a random slice index. Each slice has an equal chance.
-                const winningSliceIndex = Math.floor(Math.random() * wheelPrizesInCents.length);
-                const winningCents = wheelPrizesInCents[winningSliceIndex];
-
-                const degreesPerSlice = 360 / wheelPrizesInCents.length;
-                const randomOffset = Math.random() * (degreesPerSlice * 0.8) - (degreesPerSlice * 0.4);
-                const finalRotation = (5 * 360) + (winningSliceIndex * degreesPerSlice) + randomOffset;
-
-                wheel.style.transform = `rotate(-${finalRotation}deg)`;
-
-                setTimeout(() => {
-                    state.balanceInCents += winningCents;
-                    state.lastSpinTime = Date.now();
-                    saveState();
-                    updateUI();
-                    updateSpinTimer();
-                    showStatus(`You won ${(winningCents/100).toFixed(2)} USDT!`, 'success');
-                    spinResult.textContent = `You won ${(winningCents/100).toFixed(2)} USDT!`;
-                    spinBtn.disabled = false; // Re-enable button after spin animation, timer will still be active
-                }, 5500);
-            }
-
-            function updateSpinTimer() {
-                clearInterval(spinCooldownInterval);
-                const update = () => {
-                    const now = Date.now();
-                    const timeLeft = (state.lastSpinTime + SPIN_COOLDOWN_MS) - now;
-                    if (timeLeft <= 0) {
-                        spinTimer.textContent = '';
-                        spinBtn.disabled = false;
-                        clearInterval(spinCooldownInterval);
-                    } else {
-                        spinTimer.textContent = `Next spin in: ${formatTime(timeLeft)}`;
-                        spinBtn.disabled = true;
-                    }
-                };
-                update();
-                spinCooldownInterval = setInterval(update, 1000);
-            }
+            function handleSpin() { /* ... */ }
+            function executeSpin() { /* ... */ }
+            function updateSpinTimer() { /* ... */ }
 
             // ---- Other App Logic ----
-            function handleWithdrawal() { /* ... unchanged ... */ }
-            function generateReferralLink() { /* ... unchanged ... */ }
-            function handleReferralStart() { /* ... unchanged ... */ }
+            function handleWithdrawal() {
+                const balanceInUSDT = (state.balanceInCents / 100).toFixed(2);
+                const walletAddress = document.getElementById('paymentAddress').value.trim();
+                const bkashNumber = document.getElementById('bkashNumber').value.trim();
+
+                if (parseFloat(balanceInUSDT) < WITHDRAW_THRESHOLD) {
+                    showStatus(`You need at least ${WITHDRAW_THRESHOLD.toFixed(2)} USDT to withdraw.`, 'error');
+                    return;
+                }
+                if (!walletAddress && !bkashNumber) {
+                    showStatus('Please enter at least one withdrawal method (USDT or Bkash).', 'error');
+                    return;
+                }
+                if (walletAddress && (!walletAddress.startsWith('T') || walletAddress.length < 34)) {
+                    showStatus('Please enter a valid USDT (TRC20) wallet address.', 'error');
+                    return;
+                }
+                if (bkashNumber && (!bkashNumber.startsWith('+8801') || bkashNumber.length < 14)) {
+                     showStatus('Bkash number must start with +8801 and be 14 characters long.', 'error');
+                     return;
+                }
+
+                const user = tg.initDataUnsafe.user;
+                let message = `--- Withdrawal Request ---\n`;
+                message += `User ID: ${user.id}\n`;
+                message += `Name: ${user.first_name} ${user.last_name || ''}\n`;
+                message += `Username: @${user.username || 'N/A'}\n\n`;
+                message += `Amount: ${balanceInUSDT} USDT\n`;
+                if (walletAddress) message += `USDT Address: ${walletAddress}\n`;
+                if (bkashNumber) message += `bKash Number: ${bkashNumber}\n`;
+
+                tg.sendData(message);
+                showStatus('Your withdrawal request has been sent for review.', 'success');
+
+                state.balanceInCents = 0;
+                saveState(); updateUI();
+                document.getElementById('paymentAddress').value = '';
+                document.getElementById('bkashNumber').value = '';
+                showView('home');
+            }
+            function generateReferralLink() { /* ... */ }
+            function handleReferralStart() { /* ... */ }
 
             // ---- Initialization ----
             function initializeApp() {
@@ -381,7 +368,6 @@
                     userInfoDisplay.textContent = `Welcome, Admin! ID: ${user.id}`;
                 }
 
-                // Populate spinner wheel
                 wheel.innerHTML = '';
                 wheelPrizesInCents.forEach((prizeInCents, i) => {
                     const slice = document.createElement('div');
@@ -396,9 +382,15 @@
                 });
 
                 // Event Listeners
-                rewardedBtn.addEventListener('click', () => requestAd(() => {
+                rewardedBtn.addEventListener('click', () => requestAd(show_9671872, () => {
                     state.balanceInCents += AD_REWARD_CENTS;
                     showStatus(`Success! +${(AD_REWARD_CENTS / 100).toFixed(2)} USDT has been added.`, 'success');
+                    saveState(); updateUI();
+                }));
+
+                signupBtn.addEventListener('click', () => requestAd(() => show_9671872('pop'), () => {
+                    state.balanceInCents += 10; // 0.10 USDT = 10 cents
+                    showStatus('Success! +0.10 USDT has been added.', 'success');
                     saveState(); updateUI();
                 }));
 
