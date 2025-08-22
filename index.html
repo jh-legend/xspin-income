@@ -71,7 +71,18 @@
         }
         .nav-btn.active { color: var(--tg-theme-button-color); }
         .nav-btn:hover:not(.active) { color: #ffffff; }
-        .nav-btn .icon { width: 28px; height: 28px; margin-bottom: 4px; }
+        .nav-btn .icon {
+            width: 28px;
+            height: 28px;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .nav-btn .icon svg {
+            width: 100%;
+            height: 100%;
+        }
         .input-group { margin-bottom: 20px; text-align: left; }
         .input-group label { display: block; margin-bottom: 8px; color: var(--tg-theme-hint-color); font-size: 14px; font-weight: 500; }
         .input-group input {
@@ -153,9 +164,8 @@
             </div>
             <div class="card">
                 <h2>Your Referral Link</h2>
-                <p>Share this link with your friends. You get 0.5 USDT for each verified friend who joins!</p>
+                <p>Share this link with your friends to invite them to the app.</p>
                 <p id="referralLink" title="Click to copy"></p>
-                <p style="font-size:12px; color:var(--tg-theme-hint-color); margin-top:15px;">Note: Referral rewards require a secure backend to work correctly.</p>
             </div>
         </div>
 
@@ -180,10 +190,30 @@
 
     <!-- Footer Navigation -->
     <footer class="footer-nav">
-        <button class="nav-btn active" id="navHome"><span class="icon">...</span><span>Home</span></button>
-        <button class="nav-btn" id="navSpin"><span class="icon">...</span><span>Spin</span></button>
-        <button class="nav-btn" id="navWithdraw"><span class="icon">...</span><span>Withdraw</span></button>
-        <button class="nav-btn" id="navRefer"><span class="icon">...</span><span>Referrals</span></button>
+        <button class="nav-btn active" id="navHome">
+            <span class="icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+            </span>
+            <span>Home</span>
+        </button>
+        <button class="nav-btn" id="navSpin">
+            <span class="icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="3"></circle></svg>
+            </span>
+            <span>Spin</span>
+        </button>
+        <button class="nav-btn" id="navWithdraw">
+            <span class="icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+            </span>
+            <span>Withdraw</span>
+        </button>
+        <button class="nav-btn" id="navRefer">
+            <span class="icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            </span>
+            <span>Referrals</span>
+        </button>
     </footer>
 
     <script>
@@ -389,8 +419,40 @@
                 showView('home-view');
             }
 
-            function generateReferralLink() { /* ... */ }
-            function handleReferralStart() { /* ... */ }
+            function generateReferralLink() {
+                try {
+                    const user = tg.initDataUnsafe.user;
+                    if (user && user.id) {
+                        const link = `https://t.me/${BOT_USERNAME}?start=ref_${user.id}`;
+                        referralLinkDisplay.textContent = link;
+                        referralLinkDisplay.addEventListener('click', () => {
+                            navigator.clipboard.writeText(link).then(() => {
+                                showStatus('Referral link copied!', 'success');
+                            }, () => {
+                                showStatus('Failed to copy link.', 'error');
+                            });
+                        });
+                    } else {
+                        referralLinkDisplay.textContent = 'Could not generate referral link.';
+                    }
+                } catch (e) {
+                    console.error("Error generating referral link:", e);
+                    referralLinkDisplay.textContent = 'Error generating link.';
+                }
+            }
+            function handleReferralStart() {
+                // This function is intentionally left without user-facing functionality
+                // as per the user's request to disable referral bonuses.
+                // It can be used for logging or future features.
+                try {
+                    const startParam = tg.initDataUnsafe.start_param;
+                    if (startParam && startParam.startsWith('ref_')) {
+                         console.log(`User was referred by: ${startParam.split('_')[1]}`);
+                    }
+                } catch (e) {
+                    console.error("Error parsing referral start param:", e);
+                }
+            }
 
             // ---- Initialization ----
             function initializeApp() {
