@@ -218,13 +218,8 @@
                   spinResult = document.getElementById('spin-result'), spinTimer = document.getElementById('spin-timer');
 
             // --- Spinner Configuration ---
-            const spinRewards = [ // In USDT cents
-                { value: 1, weight: 40 },   // 0.01 USDT (40% chance)
-                { value: 5, weight: 30 },   // 0.05 USDT (30% chance)
-                { value: 10, weight: 20 },  // 0.10 USDT (20% chance)
-                { value: 30, weight: 8 },   // 0.30 USDT (8% chance)
-                { value: 50, weight: 2 }    // 0.50 USDT (2% chance)
-            ];
+            // The values for each of the 8 slices on the wheel, in USDT cents.
+            const wheelPrizesInCents = [1, 50, 5, 10, 1, 30, 5, 10];
             const sliceColors = ['#f44336', '#e91e63', '#9c27b0', '#673ab7', '#3f51b5', '#2196f3', '#03a9f4', '#00bcd4'];
 
             // --- App State ---
@@ -324,15 +319,15 @@
             }
 
             function executeSpin() {
-                const weightedRewards = spinRewards.flatMap(r => Array(r.weight).fill(r.value));
-                const winningCents = weightedRewards[Math.floor(Math.random() * weightedRewards.length)];
-                const sliceIndex = spinRewards.findIndex(r => r.value === winningCents);
+                // Select a random slice index. Each slice has an equal chance.
+                const winningSliceIndex = Math.floor(Math.random() * wheelPrizesInCents.length);
+                const winningCents = wheelPrizesInCents[winningSliceIndex];
 
-                const degreesPerSlice = 360 / spinRewards.length;
-                const randomOffset = Math.random() * degreesPerSlice * 0.8 - degreesPerSlice * 0.4;
-                const finalRotation = (5 * 360) + (sliceIndex * degreesPerSlice) + randomOffset;
+                const degreesPerSlice = 360 / wheelPrizesInCents.length;
+                const randomOffset = Math.random() * (degreesPerSlice * 0.8) - (degreesPerSlice * 0.4);
+                const finalRotation = (5 * 360) + (winningSliceIndex * degreesPerSlice) + randomOffset;
 
-                wheel.style.transform = `rotate(${finalRotation}deg)`;
+                wheel.style.transform = `rotate(-${finalRotation}deg)`;
 
                 setTimeout(() => {
                     state.balanceInCents += winningCents;
@@ -342,6 +337,7 @@
                     updateSpinTimer();
                     showStatus(`You won ${(winningCents/100).toFixed(2)} USDT!`, 'success');
                     spinResult.textContent = `You won ${(winningCents/100).toFixed(2)} USDT!`;
+                    spinBtn.disabled = false; // Re-enable button after spin animation, timer will still be active
                 }, 5500);
             }
 
@@ -383,14 +379,14 @@
 
                 // Populate spinner wheel
                 wheel.innerHTML = '';
-                spinRewards.forEach((reward, i) => {
+                wheelPrizesInCents.forEach((prizeInCents, i) => {
                     const slice = document.createElement('div');
                     slice.className = 'wheel-slice';
-                    slice.style.transform = `rotate(${(360 / spinRewards.length) * i}deg)`;
+                    slice.style.transform = `rotate(${(360 / wheelPrizesInCents.length) * i}deg)`;
                     slice.style.backgroundColor = sliceColors[i % sliceColors.length];
                     const text = document.createElement('span');
                     text.style.transform = `rotate(45deg) translate(-20px, -20px)`;
-                    text.textContent = `${(reward.value/100).toFixed(2)}`;
+                    text.textContent = `${(prizeInCents/100).toFixed(2)}`;
                     slice.appendChild(text);
                     wheel.appendChild(slice);
                 });
