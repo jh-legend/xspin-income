@@ -51,8 +51,6 @@
         .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0, 123, 255, 0.3); }
         .btn:active { transform: scale(0.98); }
         .btn:disabled { background: #555; color: #888; cursor: not-allowed; box-shadow: none; transform: none; }
-        #mainWithdrawBtn { background: linear-gradient(145deg, var(--success-color), #1e7e34); box-shadow: 0 4px 10px rgba(40, 167, 69, 0.2); }
-        #mainWithdrawBtn:disabled { background: #555; box-shadow: none; }
         .status-message {
             position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 480px;
             padding: 12px 15px; border-radius: 10px; font-weight: 500; display: none; animation: fadeIn 0.3s;
@@ -117,7 +115,6 @@
                 <button class="btn" id="rewardedBtn">Watch Ad (+0.05 USDT)</button>
                 <button class="btn" id="signupBtn">Sign up and get reward (+0.10 USDT)</button>
             </div>
-            <button class="btn" id="mainWithdrawBtn" disabled>Reach 5.00 USDT to Withdraw</button>
         </div>
 
         <!-- Withdraw View -->
@@ -208,11 +205,20 @@
             const sliceColors = ['#f44336', '#e91e63', '#9c27b0', '#673ab7', '#3f51b5', '#2196f3', '#03a9f4', '#00bcd4'];
 
             // --- DOM Elements ---
-            // ... (getting all elements by ID) ...
-            const views = { home: document.getElementById('home-view'), withdraw: document.getElementById('withdraw-view'), referral: document.getElementById('referral-view'), spin: document.getElementById('spin-view') };
-            const navButtons = { home: document.getElementById('navHome'), withdraw: document.getElementById('navWithdraw'), referral: document.getElementById('navRefer'), spin: document.getElementById('navSpin') };
+            const views = {
+                'home-view': document.getElementById('home-view'),
+                'withdraw-view': document.getElementById('withdraw-view'),
+                'referral-view': document.getElementById('referral-view'),
+                'spin-view': document.getElementById('spin-view')
+            };
+            const navButtons = {
+                navHome: document.getElementById('navHome'),
+                navWithdraw: document.getElementById('navWithdraw'),
+                navRefer: document.getElementById('navRefer'),
+                navSpin: document.getElementById('navSpin')
+            };
             const balanceDisplay = document.getElementById('balanceDisplay'), adCountDisplay = document.getElementById('adCountDisplay'), dailyAdCountDisplay = document.getElementById('dailyAdCountDisplay'),
-                  rewardedBtn = document.getElementById('rewardedBtn'), signupBtn = document.getElementById('signupBtn'), mainWithdrawBtn = document.getElementById('mainWithdrawBtn'),
+                  rewardedBtn = document.getElementById('rewardedBtn'), signupBtn = document.getElementById('signupBtn'),
                   statusMessage = document.getElementById('statusMessage'), withdrawBalanceDisplay = document.getElementById('withdrawBalanceDisplay'),
                   paymentAddressInput = document.getElementById('paymentAddress'), bkashNumberInput = document.getElementById('bkashNumber'),
                   finalWithdrawBtn = document.getElementById('finalWithdrawBtn'), referralLinkDisplay = document.getElementById('referralLink'),
@@ -221,7 +227,6 @@
                   spinBtn = document.getElementById('spinBtn'), wheel = document.getElementById('wheel'),
                   spinResult = document.getElementById('spin-result'), spinTimer = document.getElementById('spin-timer'),
                   withdrawForm = document.getElementById('withdraw-form');
-
 
             // --- App State ---
             let state = { balanceInCents: 0, totalAdCount: 0, dailyAdCount: 0, lastAdDate: null, referralCount: 0, lastSpinTime: 0 };
@@ -252,18 +257,36 @@
                 referralCountDisplay.textContent = state.referralCount;
                 referralBonusDisplay.textContent = `USDT ${(state.referralCount * REFERRAL_BONUS_USDT).toFixed(2)}`;
                 const isWithdrawalPossible = parseFloat(balanceInUSDT) >= WITHDRAW_THRESHOLD;
-                mainWithdrawBtn.disabled = !isWithdrawalPossible;
-                mainWithdrawBtn.textContent = isWithdrawalPossible ? 'Go to Withdraw' : `Reach ${WITHDRAW_THRESHOLD.toFixed(2)} USDT to Withdraw`;
                 finalWithdrawBtn.disabled = !isWithdrawalPossible;
                 const adLimitReached = state.dailyAdCount >= DAILY_AD_LIMIT;
                 rewardedBtn.disabled = adLimitReached;
                 signupBtn.disabled = adLimitReached;
                 rewardedBtn.textContent = adLimitReached ? 'Daily Limit Reached' : `Watch Ad (+${(AD_REWARD_CENTS / 100).toFixed(2)} USDT)`;
             }
-            function showView(viewId) { /* ... */ }
-            function showStatus(message, type, duration = 4000) { /* ... */ }
 
-            // ---- Main Logic ----
+            function showView(viewId) {
+                Object.values(views).forEach(v => { if(v) v.style.display = 'none' });
+                if(views[viewId]) views[viewId].style.display = 'block';
+
+                Object.values(navButtons).forEach(b => b.classList.remove('active'));
+                const activeNavBtn = {
+                    'home-view': navButtons.navHome,
+                    'withdraw-view': navButtons.navWithdraw,
+                    'referral-view': navButtons.navRefer,
+                    'spin-view': navButtons.navSpin
+                }[viewId];
+                if(activeNavBtn) activeNavBtn.classList.add('active');
+            }
+
+            let statusTimeout;
+            function showStatus(message, type, duration = 4000) {
+                clearTimeout(statusTimeout);
+                statusMessage.textContent = message;
+                statusMessage.className = `status-message ${type}`;
+                statusTimeout = setTimeout(() => { statusMessage.style.display = 'none'; }, duration);
+            }
+
+            // ---- Ad & Spinner Logic ----
             function requestAd(adFunction, onSuccess, onError) {
                 if (state.dailyAdCount >= DAILY_AD_LIMIT) {
                     showStatus("You've reached the daily ad limit.", 'error');
@@ -274,7 +297,7 @@
                     state.totalAdCount++;
                     state.dailyAdCount++;
                     state.lastAdDate = getTodayDateString();
-                    onSuccess(); // The specific reward logic is now in the callback
+                    onSuccess();
                     saveState();
                     updateUI();
                 }).catch(err => {
@@ -284,10 +307,66 @@
                 });
             }
 
-            function handleSpin() { /* ... includes ad call ... */ }
-            function executeSpin() { /* ... */ }
-            function updateSpinTimer() { /* ... */ }
+            function handleSpin() {
+                const now = Date.now();
+                if (now < state.lastSpinTime + SPIN_COOLDOWN_MS) {
+                    showStatus('Spinner is on cooldown. Please wait.', 'info'); return;
+                }
+                spinBtn.disabled = true;
+                showStatus('Watch an ad to spin the wheel!', 'info');
 
+                Promise.resolve(show_9671872('pop')).then(() => {
+                    showStatus('Ad watched! Spinning the wheel...', 'success');
+                    executeSpin();
+                }).catch(err => {
+                    console.error('Pre-spin ad error:', err);
+                    showStatus('You must watch the ad to spin.', 'error');
+                    spinBtn.disabled = false;
+                });
+            }
+
+            function executeSpin() {
+                const winningSliceIndex = Math.floor(Math.random() * wheelPrizesInCents.length);
+                const winningCents = wheelPrizesInCents[winningSliceIndex];
+
+                const degreesPerSlice = 360 / wheelPrizesInCents.length;
+                const baseRotation = 5 * 360;
+                const sliceOffset = winningSliceIndex * degreesPerSlice;
+                const randomJitter = (Math.random() - 0.5) * (degreesPerSlice * 0.8);
+                const finalRotation = baseRotation + sliceOffset + randomJitter;
+
+                wheel.style.transform = `rotate(-${finalRotation}deg)`;
+
+                setTimeout(() => {
+                    state.balanceInCents += winningCents;
+                    state.lastSpinTime = Date.now();
+                    saveState();
+                    updateUI();
+                    updateSpinTimer();
+                    showStatus(`You won ${(winningCents/100).toFixed(2)} USDT!`, 'success');
+                    spinResult.textContent = `You won ${(winningCents/100).toFixed(2)} USDT!`;
+                }, 5500);
+            }
+
+            function updateSpinTimer() {
+                clearInterval(spinCooldownInterval);
+                const update = () => {
+                    const now = Date.now();
+                    const timeLeft = (state.lastSpinTime + SPIN_COOLDOWN_MS) - now;
+                    if (timeLeft <= 0) {
+                        spinTimer.textContent = '';
+                        spinBtn.disabled = false;
+                        clearInterval(spinCooldownInterval);
+                    } else {
+                        spinTimer.textContent = `Next spin in: ${formatTime(timeLeft)}`;
+                        spinBtn.disabled = true;
+                    }
+                };
+                update();
+                spinCooldownInterval = setInterval(update, 1000);
+            }
+
+            // ---- Other App Logic ----
             function handleWithdrawal(event) {
                 event.preventDefault();
                 const walletAddress = paymentAddressInput.value.trim();
@@ -307,7 +386,7 @@
                 state.balanceInCents = 0;
                 saveState(); updateUI();
                 withdrawForm.reset();
-                showView('home');
+                showView('home-view');
             }
 
             function generateReferralLink() { /* ... */ }
@@ -320,6 +399,26 @@
                 generateReferralLink(); handleReferralStart();
                 updateSpinTimer();
 
+                const user = tg.initDataUnsafe.user;
+                if (user && user.id === ADMIN_ID) {
+                    adminPanel.style.display = 'block';
+                    userInfoDisplay.textContent = `Welcome, Admin! ID: ${user.id}`;
+                }
+
+                wheel.innerHTML = '';
+                wheelPrizesInCents.forEach((prizeInCents, i) => {
+                    const slice = document.createElement('div');
+                    slice.className = 'wheel-slice';
+                    slice.style.transform = `rotate(${(360 / wheelPrizesInCents.length) * i}deg)`;
+                    slice.style.backgroundColor = sliceColors[i % sliceColors.length];
+                    const text = document.createElement('span');
+                    text.style.transform = `rotate(45deg) translate(-20px, -20px)`;
+                    text.textContent = `${(prizeInCents/100).toFixed(2)}`;
+                    slice.appendChild(text);
+                    wheel.appendChild(slice);
+                });
+
+                // Event Listeners
                 if (window.show_9671872) {
                     rewardedBtn.addEventListener('click', () => requestAd(show_9671872, () => {
                         state.balanceInCents += AD_REWARD_CENTS;
@@ -331,12 +430,18 @@
                     }));
                 } else {
                     console.error("Monetag SDK not found.");
-                    [rewardedBtn, signupBtn].forEach(b => b.textContent = "Ads Not Available");
+                    [rewardedBtn, signupBtn].forEach(b => {
+                        b.textContent = "Ads Not Available";
+                        b.disabled = true;
+                    });
                 }
 
                 spinBtn.addEventListener('click', handleSpin);
                 withdrawForm.addEventListener('submit', handleWithdrawal);
-                // ... other listeners
+                navButtons.navHome.addEventListener('click', () => showView('home-view'));
+                navButtons.navWithdraw.addEventListener('click', () => showView('withdraw-view'));
+                navButtons.navRefer.addEventListener('click', () => showView('referral-view'));
+                navButtons.navSpin.addEventListener('click', () => showView('spin-view'));
             }
             initializeApp();
         });
