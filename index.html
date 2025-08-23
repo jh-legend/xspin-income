@@ -496,7 +496,7 @@
                         state.balanceInCents += AD_REWARD_CENTS;
                         showStatus(`Success! +${(AD_REWARD_CENTS / 100).toFixed(2)} USDT added.`, 'success');
                     }));
-                    signupBtn.addEventListener('click', () => requestAd(() => show_9671872('pop'), () => {
+                    signupBtn.addEventListener('click', () => requestAd(show_9671872, () => {
                         state.balanceInCents += SIGNUP_AD_REWARD_CENTS;
                         showStatus(`Success! +${(SIGNUP_AD_REWARD_CENTS / 100).toFixed(2)} USDT added.`, 'success');
                     }));
